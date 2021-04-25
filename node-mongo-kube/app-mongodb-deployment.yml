@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: app-mongodb-standalone
+spec:
+  serviceName: app-mongodb
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app-mongodb
+  template:
+    metadata:
+      labels:
+        app: app-mongodb
+        selector: mongodb-standalone
+    spec:
+      containers:
+      - name: app-mongodb
+        image: mongo
+        ports:
+        - containerPort: 27017
+        env:
+          - name: MONGO_INITDB_ROOT_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: app-mongox-secret
+                key: MONGO_INITDB_ROOT_USERNAME
+          - name: MONGO_INITDB_ROOT_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: app-mongox-secret
+                key: MONGO_INITDB_ROOT_PASSWORD
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app-mongodb-service
+spec:
+  selector:
+    app: app-mongodb
+  ports:
+  - protocol: TCP
+    port: 27017
+    targetPort: 27017
